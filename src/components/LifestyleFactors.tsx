@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ActivityIcon, BrainIcon, CigaretteIcon, DumbbellIcon, GraduationCapIcon, HeartIcon, SaladIcon, UserIcon, WineIcon } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface LifestyleFactorsProps {
   profile: UserProfile;
@@ -55,6 +56,13 @@ const getFactorDescription = (factor: string): string => {
   return descriptions[factor] || "";
 };
 
+// Group factors by category for better organization
+const factorCategories = {
+  health: ['smoking', 'physicalActivity', 'diet', 'bmi'],
+  lifestyle: ['alcohol', 'sleep', 'stress'],
+  social: ['socialConnections', 'education']
+};
+
 const LifestyleFactors: React.FC<LifestyleFactorsProps> = ({ 
   profile, 
   onChange,
@@ -80,70 +88,100 @@ const LifestyleFactors: React.FC<LifestyleFactorsProps> = ({
     return 0;
   };
   
+  const renderFactorCard = (factor: string) => {
+    const factorValue = profile[factor as keyof UserProfile] as string;
+    const impact = getImpactValue(factor, factorValue);
+    const impactColor = getImpactColor(impact);
+    
+    return (
+      <Card key={factor} className="overflow-hidden border border-border/50 shadow-sm transition-all duration-300 hover:shadow-md">
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex gap-3 items-center">
+              <div className={cn(
+                "p-2 rounded-full",
+                impact > 0 ? "bg-health-positive/10" : 
+                impact < 0 ? "bg-health-negative/10" : 
+                "bg-muted"
+              )}>
+                {getFactorIcon(factor)}
+              </div>
+              <div>
+                <h3 className="font-medium">{getFactorName(factor)}</h3>
+                <p className="text-xs text-muted-foreground">{getFactorDescription(factor)}</p>
+              </div>
+            </div>
+            
+            <div className={cn(
+              "text-xs px-2 py-1 rounded-full whitespace-nowrap",
+              impact > 0 ? "bg-health-positive/10 text-health-positive" : 
+              impact < 0 ? "bg-health-negative/10 text-health-negative" : 
+              "bg-muted text-muted-foreground"
+            )}>
+              {impact > 0 ? "+" : ""}{impact.toFixed(1)} years
+            </div>
+          </div>
+          
+          <div className="mt-4">
+            <Select
+              value={factorValue}
+              onValueChange={(value) => handleFactorChange(factor as keyof UserProfile, value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={`Select ${getFactorName(factor)}`} />
+              </SelectTrigger>
+              <SelectContent>
+                {getFactorOptions(factor).map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+  
   return (
     <div className={cn("space-y-6", className)}>
       <h2 className="text-xl font-semibold tracking-tight">Lifestyle Factors</h2>
       <p className="text-sm text-muted-foreground">
-        Adjust these factors to see how they impact your life expectancy
+        Update these factors to see how they impact your life expectancy
       </p>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {Object.keys(LIFESTYLE_IMPACTS).map((factor) => {
-          const factorValue = profile[factor as keyof UserProfile] as string;
-          const impact = getImpactValue(factor, factorValue);
-          const impactColor = getImpactColor(impact);
-          
-          return (
-            <Card key={factor} className="overflow-hidden border border-border/50 shadow-sm transition-all duration-300 hover:shadow-md">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex gap-3 items-center">
-                    <div className={cn(
-                      "p-2 rounded-full",
-                      impact > 0 ? "bg-health-positive/10" : 
-                      impact < 0 ? "bg-health-negative/10" : 
-                      "bg-muted"
-                    )}>
-                      {getFactorIcon(factor)}
-                    </div>
-                    <div>
-                      <h3 className="font-medium">{getFactorName(factor)}</h3>
-                      <p className="text-xs text-muted-foreground">{getFactorDescription(factor)}</p>
-                    </div>
-                  </div>
-                  
-                  <div className={cn(
-                    "text-xs px-2 py-1 rounded-full",
-                    impact > 0 ? "bg-health-positive/10 text-health-positive" : 
-                    impact < 0 ? "bg-health-negative/10 text-health-negative" : 
-                    "bg-muted text-muted-foreground"
-                  )}>
-                    {impact > 0 ? "+" : ""}{impact.toFixed(1)} years
-                  </div>
-                </div>
-                
-                <div className="mt-4">
-                  <Select
-                    value={factorValue}
-                    onValueChange={(value) => handleFactorChange(factor as keyof UserProfile, value)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={`Select ${getFactorName(factor)}`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getFactorOptions(factor).map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      <Tabs defaultValue="health" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsTrigger value="health">
+            Health Habits
+          </TabsTrigger>
+          <TabsTrigger value="lifestyle">
+            Lifestyle
+          </TabsTrigger>
+          <TabsTrigger value="social">
+            Social Factors
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="health" className="mt-0">
+          <div className="grid grid-cols-1 gap-4">
+            {factorCategories.health.map(factor => renderFactorCard(factor))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="lifestyle" className="mt-0">
+          <div className="grid grid-cols-1 gap-4">
+            {factorCategories.lifestyle.map(factor => renderFactorCard(factor))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="social" className="mt-0">
+          <div className="grid grid-cols-1 gap-4">
+            {factorCategories.social.map(factor => renderFactorCard(factor))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

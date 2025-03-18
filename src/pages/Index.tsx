@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   calculateLifeExpectancy, 
@@ -11,7 +12,8 @@ import LifestyleFactors from '@/components/LifestyleFactors';
 import LifeExpectancyChart from '@/components/LifeExpectancyChart';
 import ComparisonView from '@/components/ComparisonView';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, HeartPulse, RefreshCw } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ChevronDown, ChevronUp, HeartPulse, RefreshCw, ArrowRight } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 const Index = () => {
@@ -20,9 +22,9 @@ const Index = () => {
   const [calculationResult, setCalculationResult] = useState(calculateLifeExpectancy(profile));
   const [comparisonProfile, setComparisonProfile] = useState<UserProfile | null>(null);
   const [comparisonResult, setComparisonResult] = useState<any>(null);
-  const [showScrollArrow, setShowScrollArrow] = useState(false);
+  const [activeTab, setActiveTab] = useState("basics");
   
-  const sections = ['header', 'baseline', 'factors', 'results'];
+  const sections = ['header', 'content'];
   const staggeredSections = useStaggeredAnimation(sections, 100, 150);
   
   useEffect(() => {
@@ -33,7 +35,9 @@ const Index = () => {
       const updatedComparisonProfile = { ...profile };
       
       changedFactors.forEach(factor => {
-        updatedComparisonProfile[factor as keyof UserProfile] = comparisonProfile[factor as keyof UserProfile];
+        if (factor !== 'age' && factor !== 'gender') {
+          updatedComparisonProfile[factor as keyof UserProfile] = comparisonProfile[factor as keyof UserProfile];
+        }
       });
       
       setComparisonProfile(updatedComparisonProfile);
@@ -41,17 +45,6 @@ const Index = () => {
       setComparisonResult(comparison);
     }
   }, [profile]);
-  
-  useEffect(() => {
-    const checkScrollable = () => {
-      setShowScrollArrow(document.body.scrollHeight > window.innerHeight);
-    };
-    
-    checkScrollable();
-    window.addEventListener('resize', checkScrollable);
-    
-    return () => window.removeEventListener('resize', checkScrollable);
-  }, []);
   
   const handleCompare = () => {
     if (comparisonProfile) {
@@ -77,11 +70,12 @@ const Index = () => {
     });
   };
   
-  const scrollDown = () => {
-    window.scrollBy({
-      top: window.innerHeight * 0.8,
-      behavior: 'smooth'
-    });
+  const goToNextTab = () => {
+    if (activeTab === "basics") {
+      setActiveTab("lifestyle");
+    } else if (activeTab === "lifestyle") {
+      setActiveTab("results");
+    }
   };
 
   return (
@@ -90,7 +84,7 @@ const Index = () => {
         style={staggeredSections.find(s => s.key === 'header')?.delay ? {
           animationDelay: `${staggeredSections.find(s => s.key === 'header')?.delay}ms`
         } : {}}
-        className="animate-slide-down pt-16 pb-10 px-6 text-center"
+        className="animate-slide-down pt-10 pb-8 px-6 text-center"
       >
         <div className="inline-flex items-center justify-center gap-2 mb-3">
           <HeartPulse className="h-6 w-6 text-health-positive" />
@@ -98,110 +92,127 @@ const Index = () => {
             Longevity Calculator
           </span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
           Discover Your Life Expectancy
         </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-6">
           See how your lifestyle choices impact your longevity, based on scientific research.
         </p>
       </div>
       
-      <div className="container max-w-6xl pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-5 space-y-8">
-            <div 
-              style={staggeredSections.find(s => s.key === 'baseline')?.delay ? {
-                animationDelay: `${staggeredSections.find(s => s.key === 'baseline')?.delay}ms`
-              } : {}}
-              className="animate-scale-in"
-            >
+      <div 
+        style={staggeredSections.find(s => s.key === 'content')?.delay ? {
+          animationDelay: `${staggeredSections.find(s => s.key === 'content')?.delay}ms`
+        } : {}}
+        className="container max-w-4xl pb-20 animate-scale-in"
+      >
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="basics" className="text-sm md:text-base">
+              1. Basic Information
+            </TabsTrigger>
+            <TabsTrigger value="lifestyle" className="text-sm md:text-base">
+              2. Lifestyle Factors
+            </TabsTrigger>
+            <TabsTrigger value="results" className="text-sm md:text-base">
+              3. Results
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="basics" className="mt-0">
+            <div className="max-w-lg mx-auto">
               <BaselineForm 
                 profile={profile}
                 onChange={setProfile}
+                className="mb-6"
               />
+              
+              <div className="flex justify-end">
+                <Button onClick={goToNextTab} className="flex items-center gap-2">
+                  Continue <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            
-            <div 
-              style={staggeredSections.find(s => s.key === 'factors')?.delay ? {
-                animationDelay: `${staggeredSections.find(s => s.key === 'factors')?.delay}ms`
-              } : {}}
-              className="animate-scale-in"
-            >
+          </TabsContent>
+          
+          <TabsContent value="lifestyle" className="mt-0">
+            <div className="max-w-2xl mx-auto">
               <LifestyleFactors 
                 profile={comparisonProfile || profile}
                 onChange={comparisonProfile ? setComparisonProfile : setProfile}
               />
+              
+              <div className="flex justify-between mt-8">
+                <Button variant="outline" onClick={() => setActiveTab("basics")}>
+                  Back
+                </Button>
+                <Button onClick={goToNextTab} className="flex items-center gap-2">
+                  See Results <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            
-            <div className="flex justify-center pt-4">
-              <Button 
-                onClick={handleCompare}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                {comparisonProfile ? (
-                  <>
-                    <RefreshCw className="h-4 w-4" />
-                    Reset Comparison
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="h-4 w-4" />
-                    Start Comparison
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
+          </TabsContent>
           
-          <div 
-            style={staggeredSections.find(s => s.key === 'results')?.delay ? {
-              animationDelay: `${staggeredSections.find(s => s.key === 'results')?.delay}ms`
-            } : {}}
-            className="lg:col-span-7 space-y-8 animate-slide-up"
-          >
-            {comparisonProfile && comparisonResult ? (
-              <>
-                <div className="bg-secondary/30 rounded-lg p-3 text-center text-sm">
-                  <span className="font-medium">Comparison Mode</span> — Comparing your baseline profile with adjusted factors
+          <TabsContent value="results" className="mt-0">
+            <div className="space-y-6">
+              {comparisonProfile && comparisonResult ? (
+                <>
+                  <div className="bg-secondary/30 rounded-lg p-3 text-center text-sm max-w-2xl mx-auto">
+                    <span className="font-medium">Comparison Mode</span> — Comparing your baseline profile with adjusted factors
+                  </div>
+                  
+                  <ComparisonView 
+                    originalResult={comparisonResult.original}
+                    modifiedResult={comparisonResult.modified}
+                    difference={comparisonResult.difference}
+                    originalProfile={profile}
+                    modifiedProfile={comparisonProfile}
+                    changedFactors={getChangedFactors(profile, comparisonProfile)}
+                  />
+                </>
+              ) : (
+                <div className="max-w-2xl mx-auto">
+                  <LifeExpectancyChart data={calculationResult} />
                 </div>
-                
-                <ComparisonView 
-                  originalResult={comparisonResult.original}
-                  modifiedResult={comparisonResult.modified}
-                  difference={comparisonResult.difference}
-                  originalProfile={profile}
-                  modifiedProfile={comparisonProfile}
-                  changedFactors={getChangedFactors(profile, comparisonProfile)}
-                />
-              </>
-            ) : (
-              <LifeExpectancyChart data={calculationResult} />
-            )}
-            
-            <div className="p-6 bg-accent/50 rounded-xl">
-              <h3 className="text-lg font-medium mb-3">About This Calculator</h3>
-              <p className="text-sm text-muted-foreground">
-                This calculator uses data from multiple epidemiological studies and meta-analyses to estimate life 
-                expectancy based on various lifestyle factors. The baseline is derived from average life expectancy
-                data, and adjustments are made based on the impact of each factor. While this provides a useful estimate,
-                individual results may vary based on genetics, environmental factors, and other variables not included
-                in this model.
-              </p>
+              )}
+              
+              <div className="flex justify-center gap-4 mt-6">
+                <Button variant="outline" onClick={() => setActiveTab("lifestyle")}>
+                  Back to Lifestyle Factors
+                </Button>
+                <Button 
+                  onClick={handleCompare}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  {comparisonProfile ? (
+                    <>
+                      <RefreshCw className="h-4 w-4" />
+                      Reset Comparison
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4" />
+                      Start Comparison
+                    </>
+                  )}
+                </Button>
+              </div>
+              
+              <div className="p-6 bg-accent/50 rounded-xl max-w-2xl mx-auto mt-8">
+                <h3 className="text-lg font-medium mb-3">About This Calculator</h3>
+                <p className="text-sm text-muted-foreground">
+                  This calculator uses data from multiple epidemiological studies and meta-analyses to estimate life 
+                  expectancy based on various lifestyle factors. The baseline is derived from average life expectancy
+                  data, and adjustments are made based on the impact of each factor. While this provides a useful estimate,
+                  individual results may vary based on genetics, environmental factors, and other variables not included
+                  in this model.
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
-      
-      {showScrollArrow && (
-        <button 
-          onClick={scrollDown}
-          className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-background/80 backdrop-blur-sm border border-border rounded-full p-3 shadow-md animate-pulse-gentle"
-          aria-label="Scroll down"
-        >
-          <ChevronDown className="h-5 w-5 text-muted-foreground" />
-        </button>
-      )}
     </div>
   );
 };

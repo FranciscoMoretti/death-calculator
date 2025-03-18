@@ -29,12 +29,12 @@ const BaselineForm: React.FC<BaselineFormProps> = ({
   };
   
   return (
-    <div className={cn("form-section w-full", className)}>
+    <div className={cn("form-section", className)}>
       <h2 className="text-xl font-semibold tracking-tight mb-4">Basic Information</h2>
       
       <div className="space-y-6">
-        <div className="space-y-3">
-          <Label htmlFor="age" className="text-base">Current Age</Label>
+        <div className="space-y-2">
+          <Label htmlFor="age">Current Age</Label>
           <Input
             id="age"
             type="number"
@@ -42,16 +42,16 @@ const BaselineForm: React.FC<BaselineFormProps> = ({
             max={120}
             value={profile.age}
             onChange={handleAgeChange}
-            className="w-full max-w-[150px]"
+            className="max-w-[150px]"
           />
         </div>
         
-        <div className="space-y-3">
-          <Label className="text-base">Gender</Label>
+        <div className="space-y-2">
+          <Label>Gender</Label>
           <RadioGroup 
             value={profile.gender}
             onValueChange={(value) => handleGenderChange(value as 'male' | 'female')}
-            className="flex space-x-6"
+            className="flex flex-row space-x-4"
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="male" id="gender-male" />
@@ -66,7 +66,8 @@ const BaselineForm: React.FC<BaselineFormProps> = ({
       </div>
       
       <div className="mt-4 text-xs text-muted-foreground">
-        <p>* Gender is used for baseline calculations only, as biological factors affect average life expectancy</p>
+        <p>* Based on average life expectancy data for your demographic</p>
+        <p>* Gender is used for baseline calculations, as biological factors affect longevity</p>
       </div>
     </div>
   );

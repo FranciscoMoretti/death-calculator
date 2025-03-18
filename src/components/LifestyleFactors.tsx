@@ -81,13 +81,13 @@ const LifestyleFactors: React.FC<LifestyleFactorsProps> = ({
   };
   
   return (
-    <div className={cn("form-section max-w-4xl mx-auto", className)}>
-      <h2 className="text-xl font-semibold tracking-tight mb-4">Lifestyle Factors</h2>
-      <p className="text-sm text-muted-foreground mb-6">
+    <div className={cn("space-y-6", className)}>
+      <h2 className="text-xl font-semibold tracking-tight">Lifestyle Factors</h2>
+      <p className="text-sm text-muted-foreground">
         Adjust these factors to see how they impact your life expectancy
       </p>
       
-      <div className="space-y-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {Object.keys(LIFESTYLE_IMPACTS).map((factor) => {
           const factorValue = profile[factor as keyof UserProfile] as string;
           const impact = getImpactValue(factor, factorValue);
@@ -95,7 +95,7 @@ const LifestyleFactors: React.FC<LifestyleFactorsProps> = ({
           
           return (
             <Card key={factor} className="overflow-hidden border border-border/50 shadow-sm transition-all duration-300 hover:shadow-md">
-              <CardContent className="p-5">
+              <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex gap-3 items-center">
                     <div className={cn(

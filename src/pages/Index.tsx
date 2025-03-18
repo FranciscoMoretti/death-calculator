@@ -1,212 +1,207 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   calculateLifeExpectancy, 
   calculateComparisonData, 
   getDefaultProfile, 
-  UserProfile, 
-  LIFESTYLE_IMPACTS
+  UserProfile 
 } from '@/utils/calculationUtils';
 import { useStaggeredAnimation } from '@/utils/animationUtils';
 import BaselineForm from '@/components/BaselineForm';
 import LifestyleFactors from '@/components/LifestyleFactors';
 import LifeExpectancyChart from '@/components/LifeExpectancyChart';
+import ComparisonView from '@/components/ComparisonView';
 import { Button } from '@/components/ui/button';
-import { HeartPulse, BarChart, ArrowRight } from 'lucide-react';
+import { ChevronDown, ChevronUp, HeartPulse, RefreshCw } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from '@/components/ui/resizable';
-import { Card } from '@/components/ui/card';
 
 const Index = () => {
   const { toast } = useToast();
   const [profile, setProfile] = useState(getDefaultProfile());
   const [calculationResult, setCalculationResult] = useState(calculateLifeExpectancy(profile));
-  const isMobile = useIsMobile();
+  const [comparisonProfile, setComparisonProfile] = useState<UserProfile | null>(null);
+  const [comparisonResult, setComparisonResult] = useState<any>(null);
+  const [showScrollArrow, setShowScrollArrow] = useState(false);
   
-  const sections = ['header', 'form'];
+  const sections = ['header', 'baseline', 'factors', 'results'];
   const staggeredSections = useStaggeredAnimation(sections, 100, 150);
   
   useEffect(() => {
     setCalculationResult(calculateLifeExpectancy(profile));
+    
+    if (comparisonProfile) {
+      const changedFactors = getChangedFactors(profile, comparisonProfile);
+      const updatedComparisonProfile = { ...profile };
+      
+      changedFactors.forEach(factor => {
+        updatedComparisonProfile[factor as keyof UserProfile] = comparisonProfile[factor as keyof UserProfile];
+      });
+      
+      setComparisonProfile(updatedComparisonProfile);
+      const comparison = calculateComparisonData(profile, updatedComparisonProfile);
+      setComparisonResult(comparison);
+    }
   }, [profile]);
   
-  // Get highest impact factor for suggestions
-  const getHighestImpactFactors = () => {
-    const impactFactors = Object.keys(LIFESTYLE_IMPACTS).map(factor => {
-      const currentValue = profile[factor as keyof UserProfile] as string;
-      const options = Object.entries(LIFESTYLE_IMPACTS[factor as keyof typeof LIFESTYLE_IMPACTS]);
-      
-      // Find best possible option for this factor
-      const bestOption = options.reduce((best, current) => {
-        return current[1] > best[1] ? current : best;
-      }, ['', -100]);
-      
-      // Current impact
-      const currentImpact = LIFESTYLE_IMPACTS[factor as keyof typeof LIFESTYLE_IMPACTS][currentValue as keyof (typeof LIFESTYLE_IMPACTS)[keyof typeof LIFESTYLE_IMPACTS]] || 0;
-      
-      // Potential improvement
-      const potentialImprovement = bestOption[1] - currentImpact;
-      
-      return {
-        factor,
-        currentValue,
-        bestOption: bestOption[0],
-        potentialImprovement,
-        currentImpact
-      };
-    });
+  useEffect(() => {
+    const checkScrollable = () => {
+      setShowScrollArrow(document.body.scrollHeight > window.innerHeight);
+    };
     
-    // Sort by potential improvement descending
-    return impactFactors.sort((a, b) => b.potentialImprovement - a.potentialImprovement);
+    checkScrollable();
+    window.addEventListener('resize', checkScrollable);
+    
+    return () => window.removeEventListener('resize', checkScrollable);
+  }, []);
+  
+  const handleCompare = () => {
+    if (comparisonProfile) {
+      setComparisonProfile(null);
+      setComparisonResult(null);
+      toast({
+        title: "Comparison reset",
+        description: "You can now make changes to create a new comparison.",
+      });
+    } else {
+      setComparisonProfile({ ...profile });
+      toast({
+        title: "Comparison mode active",
+        description: "Make changes to see how they affect your life expectancy.",
+      });
+    }
+  };
+  
+  const getChangedFactors = (originalProfile: UserProfile, modifiedProfile: UserProfile): string[] => {
+    return Object.keys(originalProfile).filter(key => {
+      if (key === 'age' || key === 'gender') return false;
+      return originalProfile[key as keyof UserProfile] !== modifiedProfile[key as keyof UserProfile];
+    });
+  };
+  
+  const scrollDown = () => {
+    window.scrollBy({
+      top: window.innerHeight * 0.8,
+      behavior: 'smooth'
+    });
   };
 
-  const highestImpactFactors = getHighestImpactFactors();
-  const topSuggestions = highestImpactFactors.filter(item => item.potentialImprovement > 0).slice(0, 3);
-  
   return (
-    <div className="min-h-screen bg-background pb-8">
+    <div className="min-h-screen bg-background">
       <div 
         style={staggeredSections.find(s => s.key === 'header')?.delay ? {
           animationDelay: `${staggeredSections.find(s => s.key === 'header')?.delay}ms`
         } : {}}
-        className="animate-slide-down pt-8 pb-6 px-4 text-center"
+        className="animate-slide-down pt-16 pb-10 px-6 text-center"
       >
         <div className="inline-flex items-center justify-center gap-2 mb-3">
-          <HeartPulse className="h-5 w-5 text-health-positive" />
+          <HeartPulse className="h-6 w-6 text-health-positive" />
           <span className="text-sm font-medium px-3 py-1 rounded-full bg-muted">
-            Life Expectancy
+            Longevity Calculator
           </span>
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">
-          Your Longevity Calculator
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+          Discover Your Life Expectancy
         </h1>
-        <p className="text-muted-foreground max-w-md mx-auto text-sm">
-          See how your lifestyle choices impact your longevity.
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          See how your lifestyle choices impact your longevity, based on scientific research.
         </p>
       </div>
       
-      <div className="container mx-auto max-w-7xl px-4">
-        <div 
-          style={staggeredSections.find(s => s.key === 'form')?.delay ? {
-            animationDelay: `${staggeredSections.find(s => s.key === 'form')?.delay}ms`
-          } : {}}
-          className="animate-scale-in"
-        >
-          {isMobile ? (
-            // Mobile layout - stacked
-            <div className="space-y-6">
-              {/* Input forms */}
-              <div className="space-y-4">
-                <Card className="p-4">
-                  <BaselineForm profile={profile} onChange={setProfile} />
-                </Card>
-                <Card className="p-4">
-                  <LifestyleFactors profile={profile} onChange={setProfile} />
-                </Card>
-              </div>
-              
-              {/* Results panel */}
-              <Card className="p-4">
-                <div className="space-y-4">
-                  <div className="text-center p-4 bg-accent/30 rounded-lg">
-                    <span className="text-sm text-muted-foreground block mb-1">Your Life Expectancy</span>
-                    <h2 className="text-3xl font-bold">
-                      {calculationResult.adjustedLifeExpectancy.toFixed(1)} years
-                    </h2>
-                  </div>
-                  
-                  <LifeExpectancyChart data={calculationResult} />
-                  
-                  {topSuggestions.length > 0 && (
-                    <div className="space-y-3 mt-6 pt-4 border-t border-border">
-                      <h3 className="font-medium">Top Suggestions</h3>
-                      {topSuggestions.map((item) => (
-                        <div key={item.factor} className="p-3 rounded-lg bg-accent/30 flex items-start gap-3">
-                          <div className="mt-1 bg-primary/10 rounded-full p-1.5 flex-shrink-0">
-                            <ArrowRight className="h-3 w-3 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-sm">
-                              {item.potentialImprovement.toFixed(1)} years potential gain
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Change {item.factor.replace(/([A-Z])/g, ' $1').toLowerCase()} 
-                              from {item.currentValue.charAt(0).toUpperCase() + item.currentValue.slice(1).replace(/([A-Z])/g, ' $1')} 
-                              to {item.bestOption.charAt(0).toUpperCase() + item.bestOption.slice(1).replace(/([A-Z])/g, ' $1')}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </Card>
+      <div className="container max-w-6xl pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-5 space-y-8">
+            <div 
+              style={staggeredSections.find(s => s.key === 'baseline')?.delay ? {
+                animationDelay: `${staggeredSections.find(s => s.key === 'baseline')?.delay}ms`
+              } : {}}
+              className="animate-scale-in"
+            >
+              <BaselineForm 
+                profile={profile}
+                onChange={setProfile}
+              />
             </div>
-          ) : (
-            // Desktop layout - side-by-side resizable panels
-            <ResizablePanelGroup direction="horizontal" className="rounded-lg border min-h-[70vh]">
-              <ResizablePanel defaultSize={40} minSize={30}>
-                <div className="h-full overflow-y-auto p-6 space-y-8">
-                  <Card className="p-5 shadow-sm">
-                    <BaselineForm profile={profile} onChange={setProfile} className="mb-0" />
-                  </Card>
-                  <Card className="p-5 shadow-sm">
-                    <LifestyleFactors profile={profile} onChange={setProfile} className="mb-0" />
-                  </Card>
+            
+            <div 
+              style={staggeredSections.find(s => s.key === 'factors')?.delay ? {
+                animationDelay: `${staggeredSections.find(s => s.key === 'factors')?.delay}ms`
+              } : {}}
+              className="animate-scale-in"
+            >
+              <LifestyleFactors 
+                profile={comparisonProfile || profile}
+                onChange={comparisonProfile ? setComparisonProfile : setProfile}
+              />
+            </div>
+            
+            <div className="flex justify-center pt-4">
+              <Button 
+                onClick={handleCompare}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                {comparisonProfile ? (
+                  <>
+                    <RefreshCw className="h-4 w-4" />
+                    Reset Comparison
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4" />
+                    Start Comparison
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+          
+          <div 
+            style={staggeredSections.find(s => s.key === 'results')?.delay ? {
+              animationDelay: `${staggeredSections.find(s => s.key === 'results')?.delay}ms`
+            } : {}}
+            className="lg:col-span-7 space-y-8 animate-slide-up"
+          >
+            {comparisonProfile && comparisonResult ? (
+              <>
+                <div className="bg-secondary/30 rounded-lg p-3 text-center text-sm">
+                  <span className="font-medium">Comparison Mode</span> — Comparing your baseline profile with adjusted factors
                 </div>
-              </ResizablePanel>
-              
-              <ResizableHandle withHandle />
-              
-              <ResizablePanel defaultSize={60}>
-                <div className="h-full overflow-y-auto p-6 border-l">
-                  <div className="max-w-2xl mx-auto">
-                    <div className="text-center mb-8 p-4 bg-accent/30 rounded-lg">
-                      <span className="text-sm text-muted-foreground block mb-1">Your Life Expectancy</span>
-                      <h2 className="text-3xl font-bold">
-                        {calculationResult.adjustedLifeExpectancy.toFixed(1)} years
-                      </h2>
-                    </div>
-                    
-                    <LifeExpectancyChart data={calculationResult} />
-                    
-                    {topSuggestions.length > 0 && (
-                      <div className="space-y-4 mt-10 pt-6 border-t border-border">
-                        <h3 className="text-lg font-medium">Top Suggestions for Improvement</h3>
-                        {topSuggestions.map((item) => (
-                          <div key={item.factor} className="p-4 rounded-lg bg-accent/30">
-                            <p className="font-medium">
-                              {item.factor.replace(/([A-Z])/g, ' $1').replace(/^\w/, c => c.toUpperCase())}
-                            </p>
-                            <div className="flex items-center mt-1">
-                              <span className="text-sm text-muted-foreground">
-                                {item.currentValue.charAt(0).toUpperCase() + item.currentValue.slice(1).replace(/([A-Z])/g, ' $1')}
-                              </span>
-                              <span className="mx-2 text-sm">→</span>
-                              <span className="text-sm font-medium text-health-positive">
-                                {item.bestOption.charAt(0).toUpperCase() + item.bestOption.slice(1).replace(/([A-Z])/g, ' $1')}
-                              </span>
-                            </div>
-                            <p className="text-sm mt-2 text-health-positive font-medium">
-                              Potential gain: +{item.potentialImprovement.toFixed(1)} years
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          )}
+                
+                <ComparisonView 
+                  originalResult={comparisonResult.original}
+                  modifiedResult={comparisonResult.modified}
+                  difference={comparisonResult.difference}
+                  originalProfile={profile}
+                  modifiedProfile={comparisonProfile}
+                  changedFactors={getChangedFactors(profile, comparisonProfile)}
+                />
+              </>
+            ) : (
+              <LifeExpectancyChart data={calculationResult} />
+            )}
+            
+            <div className="p-6 bg-accent/50 rounded-xl">
+              <h3 className="text-lg font-medium mb-3">About This Calculator</h3>
+              <p className="text-sm text-muted-foreground">
+                This calculator uses data from multiple epidemiological studies and meta-analyses to estimate life 
+                expectancy based on various lifestyle factors. The baseline is derived from average life expectancy
+                data, and adjustments are made based on the impact of each factor. While this provides a useful estimate,
+                individual results may vary based on genetics, environmental factors, and other variables not included
+                in this model.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
       
-      <div className="text-xs text-center text-muted-foreground pt-8">
-        Based on epidemiological studies and meta-analyses.
-        <br />Individual results may vary based on genetics and other factors.
-      </div>
+      {showScrollArrow && (
+        <button 
+          onClick={scrollDown}
+          className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-background/80 backdrop-blur-sm border border-border rounded-full p-3 shadow-md animate-pulse-gentle"
+          aria-label="Scroll down"
+        >
+          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+        </button>
+      )}
     </div>
   );
 };

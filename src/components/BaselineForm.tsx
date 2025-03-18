@@ -30,7 +30,7 @@ const BaselineForm: React.FC<BaselineFormProps> = ({
   
   return (
     <div className={cn("form-section w-full", className)}>
-      <h2 className="text-xl font-semibold tracking-tight mb-6">Basic Information</h2>
+      <h2 className="text-xl font-semibold tracking-tight mb-4">Basic Information</h2>
       
       <div className="space-y-6">
         <div className="space-y-3">

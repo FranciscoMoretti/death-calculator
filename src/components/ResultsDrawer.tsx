@@ -1,10 +1,8 @@
 
 import React from 'react';
-import { Drawer, DrawerContent, DrawerTrigger, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import { Button } from '@/components/ui/button';
-import { LineChart } from 'lucide-react';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { LifeExpectancyResult } from '@/utils/calculationUtils';
 import LifeExpectancyChart from './LifeExpectancyChart';
-import { LifeExpectancyResult, UserProfile } from '@/utils/calculationUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ResultsDrawerProps {

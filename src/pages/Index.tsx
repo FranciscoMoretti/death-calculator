@@ -10,16 +10,19 @@ import {
 import { useStaggeredAnimation } from '@/utils/animationUtils';
 import BaselineForm from '@/components/BaselineForm';
 import LifestyleFactors from '@/components/LifestyleFactors';
-import ResultsDrawer from '@/components/ResultsDrawer';
+import LifeExpectancyChart from '@/components/LifeExpectancyChart';
 import { Button } from '@/components/ui/button';
 import { HeartPulse, BarChart, ArrowRight } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from '@/components/ui/resizable';
+import { Card } from '@/components/ui/card';
 
 const Index = () => {
   const { toast } = useToast();
   const [profile, setProfile] = useState(getDefaultProfile());
   const [calculationResult, setCalculationResult] = useState(calculateLifeExpectancy(profile));
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   const sections = ['header', 'form'];
   const staggeredSections = useStaggeredAnimation(sections, 100, 150);
@@ -62,7 +65,7 @@ const Index = () => {
   const topSuggestions = highestImpactFactors.filter(item => item.potentialImprovement > 0).slice(0, 3);
   
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-8">
       <div 
         style={staggeredSections.find(s => s.key === 'header')?.delay ? {
           animationDelay: `${staggeredSections.find(s => s.key === 'header')?.delay}ms`
@@ -83,96 +86,127 @@ const Index = () => {
         </p>
       </div>
       
-      <div className="container max-w-md mx-auto px-4 pb-24 space-y-8">
+      <div className="container mx-auto max-w-7xl px-4">
         <div 
           style={staggeredSections.find(s => s.key === 'form')?.delay ? {
             animationDelay: `${staggeredSections.find(s => s.key === 'form')?.delay}ms`
           } : {}}
-          className="animate-scale-in space-y-8"
+          className="animate-scale-in"
         >
-          {/* Basic Information */}
-          <div className="bg-card rounded-xl p-5 shadow-sm">
-            <BaselineForm 
-              profile={profile}
-              onChange={setProfile}
-            />
-          </div>
-          
-          {/* Lifestyle Factors */}
-          <div className="bg-card rounded-xl p-5 shadow-sm">
-            <LifestyleFactors 
-              profile={profile}
-              onChange={setProfile}
-            />
-          </div>
-          
-          {/* Results Button */}
-          <div className="flex justify-center pt-4">
-            <Button 
-              onClick={() => setDrawerOpen(true)}
-              size="lg"
-              className="w-full py-6 text-base flex items-center gap-2"
-            >
-              <BarChart className="h-5 w-5" />
-              View Your Results
-            </Button>
-          </div>
-          
-          {/* Current Life Expectancy Preview */}
-          <div className="bg-accent/30 rounded-xl p-5 text-center">
-            <p className="text-sm text-muted-foreground mb-1">Your Current Life Expectancy</p>
-            <h2 className="text-3xl font-bold">
-              {calculationResult.adjustedLifeExpectancy.toFixed(1)} years
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Click to see detailed analysis
-            </p>
-          </div>
-          
-          {/* Best Impact Factor Preview */}
-          {topSuggestions.length > 0 && (
-            <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="text-md font-medium mb-3">Top Suggestion</h3>
-              <div className="p-4 rounded-lg bg-accent/30 flex items-start gap-3">
-                <div className="mt-1 bg-primary/10 rounded-full p-1.5 flex-shrink-0">
-                  <ArrowRight className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">
-                    {topSuggestions[0].potentialImprovement.toFixed(1)} years potential gain
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Change your {topSuggestions[0].factor.replace(/([A-Z])/g, ' $1').toLowerCase()} 
-                    to get the biggest impact
-                  </p>
-                </div>
+          {isMobile ? (
+            // Mobile layout - stacked
+            <div className="space-y-6">
+              {/* Input forms */}
+              <div className="space-y-4">
+                <Card className="p-4">
+                  <BaselineForm profile={profile} onChange={setProfile} />
+                </Card>
+                <Card className="p-4">
+                  <LifestyleFactors profile={profile} onChange={setProfile} />
+                </Card>
               </div>
-              <div className="mt-4 text-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setDrawerOpen(true)}
-                >
-                  See All Recommendations
-                </Button>
-              </div>
+              
+              {/* Results panel */}
+              <Card className="p-4">
+                <div className="space-y-4">
+                  <div className="text-center p-4 bg-accent/30 rounded-lg">
+                    <span className="text-sm text-muted-foreground block mb-1">Your Life Expectancy</span>
+                    <h2 className="text-3xl font-bold">
+                      {calculationResult.adjustedLifeExpectancy.toFixed(1)} years
+                    </h2>
+                  </div>
+                  
+                  <LifeExpectancyChart data={calculationResult} />
+                  
+                  {topSuggestions.length > 0 && (
+                    <div className="space-y-3 mt-6 pt-4 border-t border-border">
+                      <h3 className="font-medium">Top Suggestions</h3>
+                      {topSuggestions.map((item) => (
+                        <div key={item.factor} className="p-3 rounded-lg bg-accent/30 flex items-start gap-3">
+                          <div className="mt-1 bg-primary/10 rounded-full p-1.5 flex-shrink-0">
+                            <ArrowRight className="h-3 w-3 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">
+                              {item.potentialImprovement.toFixed(1)} years potential gain
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Change {item.factor.replace(/([A-Z])/g, ' $1').toLowerCase()} 
+                              from {item.currentValue.charAt(0).toUpperCase() + item.currentValue.slice(1).replace(/([A-Z])/g, ' $1')} 
+                              to {item.bestOption.charAt(0).toUpperCase() + item.bestOption.slice(1).replace(/([A-Z])/g, ' $1')}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Card>
             </div>
+          ) : (
+            // Desktop layout - side-by-side resizable panels
+            <ResizablePanelGroup direction="horizontal" className="rounded-lg border min-h-[70vh]">
+              <ResizablePanel defaultSize={40} minSize={30}>
+                <div className="h-full overflow-y-auto p-6 space-y-8">
+                  <Card className="p-5 shadow-sm">
+                    <BaselineForm profile={profile} onChange={setProfile} className="mb-0" />
+                  </Card>
+                  <Card className="p-5 shadow-sm">
+                    <LifestyleFactors profile={profile} onChange={setProfile} className="mb-0" />
+                  </Card>
+                </div>
+              </ResizablePanel>
+              
+              <ResizableHandle withHandle />
+              
+              <ResizablePanel defaultSize={60}>
+                <div className="h-full overflow-y-auto p-6 border-l">
+                  <div className="max-w-2xl mx-auto">
+                    <div className="text-center mb-8 p-4 bg-accent/30 rounded-lg">
+                      <span className="text-sm text-muted-foreground block mb-1">Your Life Expectancy</span>
+                      <h2 className="text-3xl font-bold">
+                        {calculationResult.adjustedLifeExpectancy.toFixed(1)} years
+                      </h2>
+                    </div>
+                    
+                    <LifeExpectancyChart data={calculationResult} />
+                    
+                    {topSuggestions.length > 0 && (
+                      <div className="space-y-4 mt-10 pt-6 border-t border-border">
+                        <h3 className="text-lg font-medium">Top Suggestions for Improvement</h3>
+                        {topSuggestions.map((item) => (
+                          <div key={item.factor} className="p-4 rounded-lg bg-accent/30">
+                            <p className="font-medium">
+                              {item.factor.replace(/([A-Z])/g, ' $1').replace(/^\w/, c => c.toUpperCase())}
+                            </p>
+                            <div className="flex items-center mt-1">
+                              <span className="text-sm text-muted-foreground">
+                                {item.currentValue.charAt(0).toUpperCase() + item.currentValue.slice(1).replace(/([A-Z])/g, ' $1')}
+                              </span>
+                              <span className="mx-2 text-sm">→</span>
+                              <span className="text-sm font-medium text-health-positive">
+                                {item.bestOption.charAt(0).toUpperCase() + item.bestOption.slice(1).replace(/([A-Z])/g, ' $1')}
+                              </span>
+                            </div>
+                            <p className="text-sm mt-2 text-health-positive font-medium">
+                              Potential gain: +{item.potentialImprovement.toFixed(1)} years
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
           )}
-          
-          <div className="text-xs text-center text-muted-foreground pt-2">
-            Based on epidemiological studies and meta-analyses.
-            <br />Individual results may vary based on genetics and other factors.
-          </div>
         </div>
       </div>
       
-      {/* Results Drawer */}
-      <ResultsDrawer
-        calculationResult={calculationResult}
-        suggestions={topSuggestions}
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
-      />
+      <div className="text-xs text-center text-muted-foreground pt-8">
+        Based on epidemiological studies and meta-analyses.
+        <br />Individual results may vary based on genetics and other factors.
+      </div>
     </div>
   );
 };

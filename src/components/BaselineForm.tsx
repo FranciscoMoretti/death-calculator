@@ -1,20 +1,22 @@
-
 import React from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { UserProfile } from '@/utils/calculationUtils';
+import { Button } from '@/components/ui/button';
 
 interface BaselineFormProps {
   profile: UserProfile;
   onChange: (profile: UserProfile) => void;
+  onNext: () => void;
   className?: string;
 }
 
 const BaselineForm: React.FC<BaselineFormProps> = ({ 
   profile, 
   onChange,
+  onNext,
   className 
 }) => {
   const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,6 +65,10 @@ const BaselineForm: React.FC<BaselineFormProps> = ({
             </div>
           </RadioGroup>
         </div>
+        
+        <Button onClick={onNext} className="w-full">
+          Continue to Lifestyle Factors
+        </Button>
       </div>
       
       <div className="mt-4 text-xs text-muted-foreground">

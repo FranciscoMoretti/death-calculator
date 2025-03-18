@@ -1,14 +1,16 @@
-
 import React from 'react';
 import { UserProfile, LIFESTYLE_IMPACTS, getFactorName, getFactorOptions, getImpactColor } from '@/utils/calculationUtils';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ActivityIcon, BrainIcon, CigaretteIcon, DumbbellIcon, GraduationCapIcon, HeartIcon, SaladIcon, UserIcon, WineIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface LifestyleFactorsProps {
   profile: UserProfile;
   onChange: (updatedProfile: UserProfile) => void;
+  onNext: () => void;
+  onBack: () => void;
   className?: string;
 }
 
@@ -58,7 +60,9 @@ const getFactorDescription = (factor: string): string => {
 const LifestyleFactors: React.FC<LifestyleFactorsProps> = ({ 
   profile, 
   onChange,
-  className 
+  onNext,
+  onBack,
+  className
 }) => {
   const handleFactorChange = (factor: keyof UserProfile, value: string) => {
     const updatedProfile = {
@@ -143,6 +147,15 @@ const LifestyleFactors: React.FC<LifestyleFactorsProps> = ({
             </Card>
           );
         })}
+      </div>
+      
+      <div className="flex gap-4">
+        <Button onClick={onBack} variant="outline" className="flex-1">
+          Back
+        </Button>
+        <Button onClick={onNext} className="flex-1">
+          View Results
+        </Button>
       </div>
     </div>
   );

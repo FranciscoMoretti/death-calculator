@@ -26,13 +26,8 @@ Transform the life expectancy calculator into a compelling narrative about morta
 - "Time lost/gained" through specific choices
 
 ### 4. The Awakening (Recommendations)
-- "Your Demons" section highlighting top 3 life-shortening factors
-- Personalized impact statements:
-  - "Every cigarette costs you X minutes"
-  - "Your sedentary lifestyle is stealing X years"
+- highlighting top 3 life-shortening factors
 - Interactive "Time Reclamation" simulator
-- One-click calendar integration for habit tracking
-- Shareable "Life Extension Plan"
 
 ## Technical Implementation
 
@@ -68,6 +63,11 @@ Transform the life expectancy calculator into a compelling narrative about morta
 4. A/B testing different narrative approaches
 5. Mobile-first implementation
 6. An avatar that gets happier/sadder based on lifestyle choices (or older/younger)
+7. Personalized impact statements:
+  - "Every cigarette costs you X minutes"
+  - "Your sedentary lifestyle is stealing X years"
+
+
 
 ## Notes
 - Keep tone serious but not depressing

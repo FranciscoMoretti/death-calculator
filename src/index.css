@@ -107,11 +107,7 @@
   .health-tag-neutral {
     @apply bg-health-neutral/10 text-health-neutral;
   }
-  
-  .chart-container {
-    @apply rounded-xl p-4 bg-white shadow-md border border-border transition-all duration-300;
-  }
-  
+    
   .impact-factor {
     @apply flex items-center gap-3 p-4 rounded-lg border border-border bg-white transition-all duration-300 hover:shadow-md;
   }

@@ -20,8 +20,7 @@ Transform the life expectancy calculator into a compelling narrative about morta
 ### 3. The Revelation (Results)
 - Dramatic countdown animation to final number
 - Time visualization:
-  - Calendar view showing seasons left
-  - Heartbeats remaining counter
+  - years left
   - Weekends remaining
 - Split screen comparing "current path" vs "optimal path"
 - "Time lost/gained" through specific choices

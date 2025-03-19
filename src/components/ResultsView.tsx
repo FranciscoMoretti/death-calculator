@@ -22,33 +22,33 @@ const ResultsView: React.FC<ResultsViewProps> = ({ profile }) => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="bg-background/80 backdrop-blur-sm border border-border p-4 rounded-lg text-center animate-scale-in shadow-lg"
+          className="bg-black/95 backdrop-blur-sm border-2 border-white/20 p-4 rounded-lg text-center animate-scale-in shadow-lg"
         >
           <Calendar className="h-8 w-8 mx-auto mb-2 text-health-blue" />
-          <h3 className="text-3xl font-bold text-health-positive">{Math.round(weekendsLeft)}</h3>
-          <p className="text-sm text-muted-foreground/80">Weekends Left</p>
+          <h3 className="text-3xl font-bold text-white">{Math.round(weekendsLeft)}</h3>
+          <p className="text-sm text-white/70">Weekends Left</p>
         </motion.div>
 
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="bg-background/80 backdrop-blur-sm border border-border p-4 rounded-lg text-center animate-scale-in shadow-lg"
+          className="bg-black/95 backdrop-blur-sm border-2 border-white/20 p-4 rounded-lg text-center animate-scale-in shadow-lg"
         >
           <HeartPulse className="h-8 w-8 mx-auto mb-2 text-health-purple" />
-          <h3 className="text-3xl font-bold text-health-positive">{Math.round(heartbeatsLeft / 1000000)}M</h3>
-          <p className="text-sm text-muted-foreground/80">Heartbeats Left</p>
+          <h3 className="text-3xl font-bold text-white">{Math.round(heartbeatsLeft / 1000000)}M</h3>
+          <p className="text-sm text-white/70">Heartbeats Left</p>
         </motion.div>
 
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="bg-background/80 backdrop-blur-sm border border-border p-4 rounded-lg text-center animate-scale-in shadow-lg"
+          className="bg-black/95 backdrop-blur-sm border-2 border-white/20 p-4 rounded-lg text-center animate-scale-in shadow-lg"
         >
           <Clock className="h-8 w-8 mx-auto mb-2 text-health-orange" />
-          <h3 className="text-3xl font-bold text-health-positive">{result.totalYearsRemaining.toFixed(1)}</h3>
-          <p className="text-sm text-muted-foreground/80">Years Left</p>
+          <h3 className="text-3xl font-bold text-white">{result.totalYearsRemaining.toFixed(1)}</h3>
+          <p className="text-sm text-white/70">Years Left</p>
         </motion.div>
       </div>
 
@@ -56,10 +56,10 @@ const ResultsView: React.FC<ResultsViewProps> = ({ profile }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="bg-background/80 backdrop-blur-sm border border-border rounded-xl p-6 animate-scale-in shadow-lg"
+        className="bg-black/95 backdrop-blur-sm border-2 border-white/20 rounded-xl p-6 animate-scale-in shadow-lg"
       >
-        <h3 className="text-lg font-medium mb-3 text-muted-foreground">Your Life Timeline</h3>
-        <div className="h-2 bg-muted/20 rounded-full overflow-hidden">
+        <h3 className="text-lg font-medium mb-3 text-white/70">Your Life Timeline</h3>
+        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${(profile.age / result.adjustedLifeExpectancy) * 100}%` }}
@@ -67,7 +67,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ profile }) => {
             className="h-full bg-health-positive"
           />
         </div>
-        <div className="flex justify-between mt-2 text-sm text-muted-foreground/80">
+        <div className="flex justify-between mt-2 text-sm text-white/70">
           <span>Birth</span>
           <span>Now ({profile.age})</span>
           <span>End ({result.adjustedLifeExpectancy.toFixed(1)})</span>

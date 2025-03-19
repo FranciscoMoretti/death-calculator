@@ -1,6 +1,5 @@
-
 import React, { useMemo } from 'react';
-import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine } from 'recharts';
 import { LifeExpectancyResult } from '@/utils/calculationUtils';
 import { useAnimatedNumber, easeOutCubic } from '@/utils/animationUtils';
 import { cn } from '@/lib/utils';
@@ -15,12 +14,12 @@ const CustomTooltip = ({ active, payload }: any) => {
     const data = payload[0].payload;
     
     return (
-      <div className="bg-white p-4 rounded-lg shadow-lg border border-border">
-        <p className="font-semibold">{data.name}</p>
+      <div className="bg-black/95 p-4 rounded-lg shadow-lg border-2 border-white/20">
+        <p className="font-semibold text-white">{data.name}</p>
         <p className={cn("text-sm", data.color)}>
           {data.impact > 0 ? "+" : ""}{data.impact.toFixed(1)} years
         </p>
-        <p className="text-xs text-muted-foreground mt-1">{data.description}</p>
+        <p className="text-xs text-white/70 mt-1">{data.description}</p>
       </div>
     );
   }
@@ -51,13 +50,13 @@ const LifeExpectancyChart: React.FC<LifeExpectancyChartProps> = ({ data, classNa
   }, [data.impactByFactor]);
   
   return (
-    <div className={cn("chart-container space-y-6", className)}>
+    <div className={cn("bg-black/95 backdrop-blur-sm border-2 border-white/20 rounded-xl p-6 animate-scale-in shadow-lg", className)}>
       <div className="text-center mb-6">
-        <span className="health-tag health-tag-neutral inline-block mb-2">Life Expectancy</span>
-        <h2 className="text-4xl font-bold tracking-tight">
+        <span className="health-tag health-tag-neutral inline-block mb-2 bg-white/10 border-2 border-white/20">Life Expectancy</span>
+        <h2 className="text-4xl font-bold tracking-tight text-white">
           {animatedLifeExpectancy.toFixed(1)} years
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-white/70">
           {data.yearsGainedLost > 0 
             ? `+${data.yearsGainedLost.toFixed(1)} years from lifestyle factors` 
             : data.yearsGainedLost < 0 
@@ -67,7 +66,7 @@ const LifeExpectancyChart: React.FC<LifeExpectancyChartProps> = ({ data, classNa
       </div>
       
       <div className="pt-4">
-        <h3 className="text-md font-medium mb-4">Impact of Lifestyle Factors</h3>
+        <h3 className="text-md font-medium mb-4 text-white">Impact of Lifestyle Factors</h3>
         <ResponsiveContainer width="100%" height={40 * chartData.length} className="mt-4">
           <BarChart
             data={chartData}
@@ -78,13 +77,17 @@ const LifeExpectancyChart: React.FC<LifeExpectancyChartProps> = ({ data, classNa
               type="number"
               domain={[-10, 10]}
               tickFormatter={(value) => `${value > 0 ? '+' : ''}${value}`}
+              tick={{ fill: '#94A3B8' }}
+              axisLine={{ stroke: '#94A3B8', strokeOpacity: 0.2 }}
+              tickLine={false}
             />
+            <ReferenceLine x={0} stroke="#94A3B8" strokeDasharray="3 3" strokeOpacity={0.3} />
             <YAxis 
               type="category" 
               dataKey="name" 
               tickLine={false}
-              axisLine={false}
-              tick={{ fill: '#64748b', fontSize: 12 }}
+              axisLine={{ stroke: '#94A3B8', strokeOpacity: 0.2 }}
+              tick={{ fill: '#94A3B8', fontSize: 12 }}
               tickFormatter={(value) => {
                 const names: Record<string, string> = {
                   smoking: "Smoking",
@@ -113,7 +116,7 @@ const LifeExpectancyChart: React.FC<LifeExpectancyChartProps> = ({ data, classNa
                 dataKey="impact" 
                 position="right" 
                 formatter={(value: number) => `${value > 0 ? '+' : ''}${value.toFixed(1)}`}
-                style={{ fill: '#64748b', fontSize: 12, fontWeight: 500 }}
+                style={{ fill: '#94A3B8', fontSize: 12, fontWeight: 500 }}
               />
             </Bar>
           </BarChart>
@@ -121,11 +124,11 @@ const LifeExpectancyChart: React.FC<LifeExpectancyChartProps> = ({ data, classNa
       </div>
       
       <div className="text-center pt-6">
-        <span className="health-tag health-tag-neutral inline-block mb-2">Years Remaining</span>
-        <h3 className="text-2xl font-bold">
+        <span className="health-tag health-tag-neutral inline-block mb-2 bg-white/10 border-2 border-white/20">Years Remaining</span>
+        <h3 className="text-2xl font-bold text-white">
           {data.totalYearsRemaining.toFixed(1)} years
         </h3>
-        <p className="text-sm text-muted-foreground">Based on your current age of {data.currentAge}</p>
+        <p className="text-sm text-white/70">Based on your current age of {data.currentAge}</p>
       </div>
     </div>
   );

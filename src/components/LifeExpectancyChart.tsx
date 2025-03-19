@@ -66,7 +66,7 @@ const LifeExpectancyChart: React.FC<LifeExpectancyChartProps> = ({ data, classNa
       </div>
       
       <div className="pt-4">
-        <h3 className="text-md font-medium mb-4 text-white">Impact of Lifestyle Factors</h3>
+        <h3 className="text-md text-center font-medium mb-4 text-white">Impact of Lifestyle Factors</h3>
         <ResponsiveContainer width="100%" height={40 * chartData.length} className="mt-4">
           <BarChart
             data={chartData}

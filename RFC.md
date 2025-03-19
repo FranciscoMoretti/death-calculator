@@ -1,5 +1,4 @@
-# Death Calculator: An Immersive Journey to Self-Discovery
-
+# Death Calculator
 ## Overview
 Transform the life expectancy calculator into a compelling narrative about mortality, choices, and their consequences. The experience should be both enlightening and slightly unsettling, encouraging users to reflect on their lifestyle choices.
 

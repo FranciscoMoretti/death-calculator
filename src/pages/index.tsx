@@ -5,7 +5,7 @@ import LifestyleFactorsJourney from '../components/LifestyleFactorsJourney';
 import { getDefaultProfile, UserProfile } from '@/utils/calculationUtils';
 import ResultsView from '../components/ResultsView';
 
-export const Landing = () => {
+export const Index = () => {
   const [profile, setProfile] = useState<UserProfile>(getDefaultProfile());
   const [currentStep, setCurrentStep] = useState<'awakening' | 'reflection' | 'results'>('awakening');
   const [timeSpent, setTimeSpent] = useState<string>('');
